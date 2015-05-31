@@ -19,6 +19,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String){
 
    }
 
+//HAHAHA, I just wrote the most useless recursive function ever, If you just do textLines(ROW), you get exactly the same :P
    def returnLine(textLines: List[String], row: Int): Option[String]={
       textLines match{
          case head :: tail if row == 1 => Some(head)
