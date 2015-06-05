@@ -1,4 +1,5 @@
-
+/** voice_recording_play_back_tools = vorema
+  */
 
 class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String){
    case class CursorPos(row: Int, col: Int){
