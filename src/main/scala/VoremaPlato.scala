@@ -1,20 +1,24 @@
-
+package vorema.playback{
+import scala.sys.process._
+case class CursorPos(row: Int, col: Int){
+	override def toString(): String ={
+	 "[ROW=" + row + ", COL="+col+"]"
+	}
+}
 
 class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String){
-   case class CursorPos(row: Int, col: Int){
-      override def toString(): String ={
-         "[ROW=" + row + ", COL="+col+"]"
-      }
-   }
 
-   def voremaplato(filename: String, cursorPosition: CursorPos): Unit ={
+
+   def voremaPlatoOpen(filename: String, cursorPosition: CursorPos): Unit ={
       val fileOpen = scala.io.Source.fromFile(filename)
       val fileContents = try fileOpen.getLines().toList finally fileOpen.close()
       if(!fileContents.isEmpty){
-         val cursorLine = returnLine(fileContents, cursorPosition.row)
-         val possibleRecNames = stripRecName(cursorLine.get())
+         val cursorLine = returnLine(fileContents, cursorPosition.row).get
+         val possibleRecNames = stripRecName(cursorLine)
          val playFile = returnClosestRecName(cursorLine, cursorPosition.col, possibleRecNames)
-         println("Play this file: "+ playFile + " Because cursor was located at: " cursorPosition)
+	 
+         println("Playing this file: "+ playFile + " Because cursor was located at: " + cursorPosition)
+         playUnderCursor(playFile.get)
       }
 
    }
@@ -46,8 +50,10 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String){
       recnameMatches zip cleanedRec
    }
 
-   def playUnderCursor(): Unit ={
-
+   def playUnderCursor(fileName: String): Unit ={
+	val command = mediaPlayer+" " + voiceRedDir +"/"+fileName+".mp3"
+	println("Running command: " + command)
+	Process(command)!
    }
 
    def playLatestBefore(): Unit ={
@@ -66,4 +72,5 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String){
 
    }
 
+}
 }
