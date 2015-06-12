@@ -83,17 +83,15 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       val currentCursorDate = FULL_TIME_FORMAT.parse(cursorFileName)
       val theDates = convertToDates(possibleRecNames, currentCursorDate)
       val latestBefore: Option[Date] = theDates.filter(time => currentCursorDate.after(time)) match{
-         case list => Some(list.last)
          case Nil => None
-      }
-      val asString = latestBefore.get match{
-         case time: Date => FULL_TIME_FORMAT.format(time)
-         case _ => "[NOT_FOUND]"
-      }
-      println("Possible rec names: " + asString)
-      println("Current file: " + currentCursorDate)
-      Some(asString)
+         case list => Some(list.last)
 
+      }
+      val asString: Option[String] = latestBefore match{
+         case Some(time) => Some(FULL_TIME_FORMAT.format(time))
+         case None => None
+      }
+      asString
    }
 
    def playFile(fileName:String): Unit = {
