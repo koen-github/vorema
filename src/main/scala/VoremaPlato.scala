@@ -24,7 +24,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
          val file = returnClosestRecName(cursorLine, cursorPosition.col, possibleRecNames)
          val allNames = stripAllRecNames(fileContents).filter(theList => theList != Nil).map(nex => nex.map(_._2)).flatten
         // println("All recnames in file: "+ allNames)
-         findLatestBefore(allNames, file.get)
+         playLatestBefore(allNames, file.get)
          file
       } else{
          None
@@ -79,24 +79,39 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       theDates
    }
 
-   def findLatestBefore(possibleRecNames: List[String], cursorFileName: String): String = {
+   def findLatestBefore(possibleRecNames: List[String], cursorFileName: String): Option[String] = {
       val currentCursorDate = FULL_TIME_FORMAT.parse(cursorFileName)
       val theDates = convertToDates(possibleRecNames, currentCursorDate)
-      val latestBefore = theDates.filter(time => currentCursorDate.after(time)).takeRight(1).head
-      println("Possible rec names: " + FULL_TIME_FORMAT.format(latestBefore))
+      val latestBefore: Option[Date] = theDates.filter(time => currentCursorDate.after(time)) match{
+         case list => Some(list.last)
+         case Nil => None
+      }
+      val asString = latestBefore.get match{
+         case time: Date => FULL_TIME_FORMAT.format(time)
+         case _ => "[NOT_FOUND]"
+      }
+      println("Possible rec names: " + asString)
       println("Current file: " + currentCursorDate)
-      FULL_TIME_FORMAT.format(latestBefore)
+      Some(asString)
 
    }
 
-   def playUnderCursor(fileName: String): Unit = {
-      val command = mediaPlayer + " " + voiceRedDir + "/" + fileName + ".mp3"
+   def playFile(fileName:String): Unit = {
+      val command = mediaPlayer + " " + voiceRedDir + "/" + fileName + ".mp3" //todo, search for file instead of adding .mp3
       println("Running command: " + command)
       Process(command) !
    }
 
-   def playLatestBefore(): Unit = {
 
+   def playUnderCursor(fileName: String): Unit = {
+      playFile(fileName)
+   }
+
+   def playLatestBefore(possibleRecNames: List[String], fileName: String): Unit = {
+      findLatestBefore(possibleRecNames, fileName) match{
+         case Some(fl) => playFile(fileName)
+         case None => throw new Exception("No prev file found")
+      }
    }
 
    def playEarliestBefore(): Unit = {
