@@ -1,4 +1,4 @@
-package vorema.playback
+package vorema
 
 object Vorema {
    def main(args: Array[String]): Unit = {
