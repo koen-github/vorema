@@ -35,6 +35,7 @@ case class Log(theText: String, theValue: Any) {
 class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
    val FULL_TIME_FORMAT = new java.text.SimpleDateFormat("'y'yyyy'_m'MM'_d'dd'_h'HH'_m'mm'_s'ss")
    var CURRENT_INDEX_FILENAME = -1
+   val RUN_MEDIAPLAYER = true //set for testing purpose, true to actually run the mediaplayer, false to only show the command
 
    /** Used to start processing user input
     *
@@ -117,7 +118,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
      * @param fileName cursor located filename
    */
    def playUnderCursor(fileName: String): Unit = {
-      playFile(fileName)
+      playFile(fileName, RUN_MEDIAPLAYER)
    }
 
    /** Function to start playing a filename, found in the input text. This will search into the specified recording dir, and play the file in the specified music player
@@ -149,7 +150,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
      */
    def playLatestBefore(possibleRecNames: List[String], fileName: String): Unit = {
       findLatestBefore(possibleRecNames, fileName) match {
-         case Some(fl) => playFile(fileName)
+         case Some(fl) => playFile(fileName, RUN_MEDIAPLAYER)
          case None => Log("Error: No previous file found before ", fileName).printWDate()
       }
    }
@@ -206,7 +207,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
             val prevFile = possibleRecNames(indexOfCurrent - 1)
             Log("The index was: ", indexOfCurrent).printWDate()
             Log("The prev file is: ", prevFile).printWDate()
-            playFile(prevFile)
+            playFile(prevFile, RUN_MEDIAPLAYER)
 
          }
       }
@@ -229,7 +230,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
          }
       }
       Log("playNext: ", CURRENT_INDEX_FILENAME).printWDate()
-      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2)
+      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2, RUN_MEDIAPLAYER)
 
    }
 
@@ -259,7 +260,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
 
       Log("playPrev: ", CURRENT_INDEX_FILENAME).printWDate()
-      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2)
+      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2, RUN_MEDIAPLAYER)
    }
 
 }
