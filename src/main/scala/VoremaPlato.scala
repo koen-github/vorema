@@ -1,4 +1,4 @@
-/** voice_recording_play_back_tools = vorema
+/** voice_recording_play_back_tools = voreplato = vorema.playback
   */
 package vorema.playback
 
