@@ -1,0 +1,1 @@
+Index.PACKAGES = {"vorema" : [{"case class" : "vorema\/CursorPos.html", "name" : "vorema.CursorPos"}, {"case class" : "vorema\/Log.html", "name" : "vorema.Log"}, {"object" : "vorema\/Vorema$.html", "name" : "vorema.Vorema"}, {"class" : "vorema\/VoremaPlato.html", "name" : "vorema.VoremaPlato"}]};

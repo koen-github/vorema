@@ -1,7 +1,8 @@
 /** voice_recording_play_back_tools = voreplato = vorema.playback
   */
-package vorema.playback
+package vorema
 
+import java.io.File
 import java.text.{SimpleDateFormat, ParseException}
 import java.util.{Calendar, Date}
 
@@ -13,6 +14,11 @@ case class CursorPos(row: Int, col: Int) {
    }
 }
 
+/** Log all the actions and errors from VoremaPlato
+ *
+ * @param theText the information text
+ * @param theValue the interesting value
+ */
 case class Log(theText: String, theValue: Any) {
    val date_format = new SimpleDateFormat("yyyy-mm-dd-HH:MM:SS")
 
@@ -29,6 +35,7 @@ case class Log(theText: String, theValue: Any) {
 class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
    val FULL_TIME_FORMAT = new java.text.SimpleDateFormat("'y'yyyy'_m'MM'_d'dd'_h'HH'_m'mm'_s'ss")
    var CURRENT_INDEX_FILENAME = -1
+   val RUN_MEDIAPLAYER = true //set for testing purpose, true to actually run the mediaplayer, false to only show the command
 
    /** Used to start processing user input
     *
@@ -52,7 +59,13 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
    }
 
-   //hahahaa, I just wrote the most useless recursive function ever, If you just do textLines(ROW), you get exactly the same :P
+
+   def findRecordingFiles(path:File):List[File]=
+   {
+      val parts=path.listFiles.toList.partition(_.isDirectory)
+      parts._2 ::: parts._1.flatMap(findRecordingFiles)
+   }
+
    def returnLine(textLines: List[String], row: Int): Option[String] = {
       textLines match {
          case head :: tail if row == 1 => Some(head)
@@ -61,6 +74,13 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
    }
 
+   /** Find the closest recording filename located from the cursor position
+    *
+    * @param textLine The cursor located text line (row)
+    * @param col The cursor located col
+    * @param recnames All the possible recording name found in the text file specified by the user
+    * @return A possible recording filename, closest to the cursor position
+    */
    def returnClosestRecName(textLine: String, col: Int, recnames: List[(String, String)]): Option[String] = {
       val rangePosOfRec: List[(Int, Int)] = recnames.map(rec => (textLine.indexOfSlice(rec._1).toInt, textLine.indexOfSlice(rec._1) + rec._1.length.toInt))
       val ColBetween: Int = rangePosOfRec.map(range => range._1 <= col && col <= range._2).indexOf(true)
@@ -70,6 +90,11 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
    }
 
+   /** Strip all recording names found in the text file the user submitted
+    *
+    * @param theText A list of text strings
+    * @return A list of String tuples, one containg the clean filename, the other containing the filename including VR{ }
+    */
    def stripAllRecNames(theText: List[String]): List[List[(String, String)]] = {
       theText match {
          case head :: tail => stripRecName(head) :: stripAllRecNames(tail)
@@ -77,11 +102,12 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
    }
 
-   // date -d "$(echo "y2015_m04_d19_h15_m44_s49" | sed -e 's/_[h]/ /g' -e 's/[a-z]//g' -e 's/_/-/g' -e 's/-/:/3g')"
-
-
+   /** Strip all the recording names found in a string
+    *
+    * @param procContents text contents containing recording filenames
+    * @return A list of tuple strings, one with a clean filename, the other one including the VR{ } part
+    */
    def stripRecName(procContents: String): List[(String, String)] = {
-      //And yet another one here: VR{| y2015_m05_d17. |}
       val recnameMatches: List[String] = ("""VR\{\|(.*?)\|\}""".r findAllIn procContents toList)
       val cleanedRec = recnameMatches.map(_.replace("VR{| ", "").replace(". |}", ""))
       recnameMatches zip cleanedRec
@@ -90,19 +116,31 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
    /** Function to play the filename recording located under the cursor positions
      *
      * @param fileName cursor located filename
-     */
+   */
    def playUnderCursor(fileName: String): Unit = {
-      playFile(fileName)
+      playFile(fileName, RUN_MEDIAPLAYER)
    }
 
    /** Function to start playing a filename, found in the input text. This will search into the specified recording dir, and play the file in the specified music player
      *
      * @param fileName the filename that must be played
      */
-   def playFile(fileName: String): Unit = {
-      val command = mediaPlayer + " " + voiceRedDir + "/" + fileName + ".mp3" //todo, search for file instead of adding .mp3
-      Log("Running command: ", command).printWDate()
-    //  Process(command) !
+   def playFile(fileName: String, runCommand: Boolean = false): Int = {
+      val allFiles: List[File] = findRecordingFiles(new File(voiceRedDir))
+      val findFile = allFiles.find(_.getName().contains(fileName))
+      Log("Found file: ", findFile).printWDate()
+      findFile match {
+         case Some(file) => {
+            val command = mediaPlayer + " " + file
+            Log("Running command: ", command).printWDate()
+            if (runCommand) {
+               Process(command) !
+            } else {
+               1; //failure to run mediaplayer
+            }
+         }
+         case _ => 1;
+      }
    }
 
    /** Plays the latest filename in date before the filename located under the cursor
@@ -112,11 +150,17 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
      */
    def playLatestBefore(possibleRecNames: List[String], fileName: String): Unit = {
       findLatestBefore(possibleRecNames, fileName) match {
-         case Some(fl) => playFile(fileName)
+         case Some(fl) => playFile(fileName, RUN_MEDIAPLAYER)
          case None => Log("Error: No previous file found before ", fileName).printWDate()
       }
    }
 
+   /** Find the latest recording in time before the current one (located under the cursor position)
+    *
+    * @param possibleRecNames all the possible recording names found in the specified text file
+    * @param cursorFileName the current cursor file name
+    * @return possible filename found as previous filename seen from the current one
+    */
    def findLatestBefore(possibleRecNames: List[String], cursorFileName: String): Option[String] = {
       val currentCursorDate = FULL_TIME_FORMAT.parse(cursorFileName)
       val theDates = convertToDates(possibleRecNames).filter(_ != currentCursorDate).sortBy(_.getTime)
@@ -132,6 +176,11 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       asString
    }
 
+   /** Convert all the filenames found in the text file specified by the user to a usable Date format
+    *
+    * @param possibleRecNames all the filenames found in the text file
+    * @return list of Dates, None if the date was not parseable
+    */
    def convertToDates(possibleRecNames: List[String]): List[Date] = {
       val theDates: List[Date] = possibleRecNames.flatMap { theTime =>
          try {
@@ -158,7 +207,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
             val prevFile = possibleRecNames(indexOfCurrent - 1)
             Log("The index was: ", indexOfCurrent).printWDate()
             Log("The prev file is: ", prevFile).printWDate()
-            playFile(prevFile)
+            playFile(prevFile, RUN_MEDIAPLAYER)
 
          }
       }
@@ -181,7 +230,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
          }
       }
       Log("playNext: ", CURRENT_INDEX_FILENAME).printWDate()
-      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2)
+      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2, RUN_MEDIAPLAYER)
 
    }
 
@@ -211,7 +260,7 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
       }
 
       Log("playPrev: ", CURRENT_INDEX_FILENAME).printWDate()
-      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2)
+      playFile(filenamesAndDates(CURRENT_INDEX_FILENAME)._2, RUN_MEDIAPLAYER)
    }
 
 }
