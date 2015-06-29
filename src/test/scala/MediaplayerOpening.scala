@@ -5,7 +5,7 @@ import vorema.{VoremaPlato, CursorPos}
  *
  */
 class MediaplayerOpening extends FlatSpec {
-   "VoremaPlato " should " should open and play a mediaplayer" in {
+   ignore should " should open and play a mediaplayer" in { //"VoremaPlato "
       val userFileNameText = "voremaText"
       val mediaPlayer = "rhythmbox"
       val curPos: CursorPos = CursorPos(5,26)

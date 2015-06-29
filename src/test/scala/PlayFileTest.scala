@@ -7,7 +7,7 @@ import vorema.{CursorPos, VoremaPlato}
  */
 class PlayFileTest extends FlatSpec {
 
-   "VoremaPlato " should " play the filename under the cursor position" in {
+   ignore should " play the filename under the cursor position" in {//"VoremaPlato "
       val userFileNameText = "voremaText"
       val curPos: CursorPos = CursorPos(5,26)
       val voremo = new VoremaPlato("vim", "rhythmbox", "playBackRecordings")

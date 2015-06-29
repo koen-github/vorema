@@ -6,7 +6,7 @@ import vorema.{CursorPos, VoremaPlato}
  * Note: Only specify a cursor position with a full date, otherwise this test case doesn't work (TODO: also parse the other formats)
  */
 class PlayNextPrev extends FlatSpec {
-   "VoremaPlato " should " find the next and prev filename in time" in {
+   ignore should " find the next and prev filename in time" in { //"VoremaPlato "
       val userFileNameText = "voremaText"
       val curPos: CursorPos = CursorPos(5, 26);
       val voremo = new VoremaPlato("vim", "rhythmbox", "playBackRecordings")

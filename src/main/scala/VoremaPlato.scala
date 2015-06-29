@@ -34,6 +34,9 @@ case class Log(theText: String, theValue: Any) {
 
 class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
    val FULL_TIME_FORMAT = new java.text.SimpleDateFormat("'y'yyyy'_m'MM'_d'dd'_h'HH'_m'mm'_s'ss")
+   val HALF_DAY_FORMAT = new java.text.SimpleDateFormat("'y'yyyy'_m'MM'_d'dd")
+  // val HALF_DAY_WITH_SERIE_FORMAT = new java.text.SimpleDateFormat("'y'yyyy'_m'MM'_d'dd'_o'o") NOT WORKING
+
    val RUN_MEDIAPLAYER = true //set for testing purpose, true to actually run the mediaplayer, false to only show the command
    var CURRENT_INDEX_FILENAME = -1
 
@@ -125,8 +128,9 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
      * @param fileName the filename that must be played
      */
    def playFile(fileName: String, runCommand: Boolean = false): Int = {
-      val allFiles: List[File] = findRecordingFiles(new File(voiceRedDir))
-      val findFile = allFiles.find(_.getName().contains(fileName))
+      val allFiles: List[File] = findRecordingFiles(new File(voiceRedDir)).sortBy(_.getName())
+      val findFile = allFiles.find(_.getName().startsWith(fileName))
+      Log("All the files: ", allFiles).printWDate()
       Log("Found file: ", findFile).printWDate()
       findFile match {
          case Some(file) => {
@@ -183,13 +187,35 @@ class VoremaPlato(editor: String, mediaPlayer: String, voiceRedDir: String) {
    def convertToDates(possibleRecNames: List[String]): List[Date] = {
       val theDates: List[Date] = possibleRecNames.flatMap { theTime =>
          try {
-            Some(FULL_TIME_FORMAT.parse(theTime))
+            Some(FULL_TIME_FORMAT.parse(theTime)) //normal format, full date range
          }
          catch {
-            case e: ParseException => None //todo, also parse the other formats..
+            case e: ParseException => {
+               try{
+                  Some(HALF_DAY_FORMAT.parse(theTime))
+               }
+               catch{
+                  case e: ParseException => None /*{
+                     try{
+                        Some(HALF_DAY_WITH_SERIE_FORMAT.parse(theTime))
+                     }
+                     catch{
+                        case e: ParseException => None //no date format was found
+                     }
+                  }*/
+               }
+            }
          }
       }
       theDates
+   }
+
+   //this function is not yet in use
+   def convertToFilenames(listOfdates: List[Date]): List[String]={
+      val dateToFile = listOfdates.map({
+         dt => FULL_TIME_FORMAT.format(dt)
+      })
+      dateToFile
    }
 
    /** Plays the recording that closest before the filename under the cursor
