@@ -7,7 +7,7 @@ import vorema.{VoremaPlato, CursorPos}
 class MediaplayerOpening extends FlatSpec {
    ignore should " should open and play a mediaplayer" in { //"VoremaPlato "
       val userFileNameText = "voremaText"
-      val mediaPlayer = "rhythmbox"
+      val mediaPlayer = "mplayer"
       val curPos: CursorPos = CursorPos(5,26)
       val voremo = new VoremaPlato("vim", mediaPlayer, "playBackRecordings")
       val fileName = voremo.voremaPlatoOpen(userFileNameText, curPos)

@@ -10,7 +10,7 @@ class SpecialTimeFormats extends FlatSpec{
    "VoremaPlato " should " parse the special timeformats" in {
       val userFileNameText = "voremaText"
       val curPos: CursorPos = CursorPos(6,38)
-      val voremo = new VoremaPlato("vim", "rhythmbox", "playBackRecordings")
+      val voremo = new VoremaPlato("vim", "mplayer", "playBackRecordings")
       info("At position "+curPos+" VoremaPlato must return the SPECIAL filename under the cursor position located in text file " + userFileNameText)
       val fileName = voremo.voremaPlatoOpen(userFileNameText, curPos)
 
