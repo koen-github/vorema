@@ -11,7 +11,7 @@
 	(setq charLocation (point))
 	(setq file (buffer-file-name))
 	(setq cmd-string (concat "java -jar " jarVoremoLocation " " editorName " " musicPlayer " " voiceRedDir  " " file " " (number-to-string charLocation)  " "))
-	(message "The command: %s" cmd-string)
+	;(message "The command: %s" cmd-string)
 	(shell-command cmd-string "*RUNNING VOREMO*" ))))
 
 
