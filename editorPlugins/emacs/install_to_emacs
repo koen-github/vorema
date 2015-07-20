@@ -1,4 +1,6 @@
-##INSTALL TO EMACS##
+NOTE: Please use script in main dir, instead of manual install
+
+##MANUAL INSTALL TO EMACS##
 
 Add this to your local ~/.emacs file (if file doesn't exist, create it)
 Replace path to the script location of emacs_vorema.el

@@ -1,0 +1,23 @@
+"UNCOMMENT THESE LINES TO MANUAL INSTALL, OTHERWISE, USE SCRIPT
+"function! Vorema_plackback()
+"let editorName = "vim"
+"let musicplayer = "mplayer"
+"let jarVoremoLocation = "/home/koen/vorema/target/scala-2.11/Vorema-assembly-1.0.jar"
+"let voiceRedDir = "/home/koen/vorema/playBackRecordings"
+
+
+let row = line(".")
+let col = col(".")
+let cusorPos = getpos(".") 
+"echo "CursorPos:"
+"echo row.",".col
+let filename = expand('%:p')
+let command_string = "java -jar ".jarVoremoLocation." ".editorName." ".musicplayer." ".voiceRedDir." ".filename." ".row.",".col." "
+"echo "Command string: "
+"echo command_string
+let run_vorema_script = substitute(system(command_string), "\n*$", '', '')
+echo "Command output: "
+echo run_vorema_script
+endfunction
+
+noremap <F4> :call Vorema_plackback()<CR>

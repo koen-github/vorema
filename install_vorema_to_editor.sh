@@ -7,7 +7,7 @@ mkdir -p $CURRENT_LOCATION/user_specific
 
 
 echo "###################################################################"
-echo "#################### INSTALL SCRIPT FOR VOREMO ####################"
+echo "#################### INSTALL SCRIPT FOR VOREMA ####################"
 echo "###################################################################"
 
 echo "FOUND ASSEMBLY JAR: $JAR_LOCATION"
@@ -19,7 +19,7 @@ do
     case $opt in
         "yes")
 	    echo "###################################################################"
-	    echo "###################### RECOMPILING VOREMO JAR #####################"
+	    echo "###################### RECOMPILING VOREMA JAR #####################"
 	    echo "###################################################################"
             cd `pwd`
 	    sbt assembly
@@ -45,7 +45,7 @@ read VOICE_DIR
 
 echo "###################################################################"
 
-echo "Select editor to use with voremo: "
+echo "Select editor to use with vorema: "
 
 options=("emacs" "(g)vim" "Quit")
 select opt in "${options[@]}"
@@ -82,6 +82,31 @@ do
             ;;
         "(g)vim")
             echo "you chose (g)vim as editor"
+	    
+		VIM_PLUGIN_LOCATION="$CURRENT_LOCATION/editorPlugins/(g)vim"
+	    PLUGIN_CONTENTS=`tail -n +7 "$VIM_PLUGIN_LOCATION/vim_plugin_vorema"`
+	    PLUGIN_OPTIONS="
+function! Vorema_plackback()
+let editorName = \"vim\"
+let musicplayer = \"$MUSIC_PLAYER\"
+let jarVoremoLocation = \"$JAR_LOCATION\"
+let voiceRedDir = \"$VOICE_DIR\"
+		"
+FULL_PLUGIN_CONTENTS=$PLUGIN_OPTIONS$PLUGIN_CONTENTS
+	    VIM_NEW_PLUGIN="$CURRENT_LOCATION/user_specific/generated_vim_plugin.vim"	
+	    echo "$FULL_PLUGIN_CONTENTS" > $VIM_NEW_PLUGIN
+		
+ 	    echo "###################################################################"
+	    echo "COPY NEW VIM PLUGIN TO ~/.vim/plugin/? (y/n), followed by [ENTER]:"
+	    read VIM_FILE_OPTION
+
+	    if [ "$VIM_FILE_OPTION" = "y" ]; then
+		mkdir -p $HOME/.vim/plugin
+		echo "Copying generated vim plugin to home vim directory"
+		cp $VIM_NEW_PLUGIN $HOME/.vim/plugin
+	    fi
+	    echo "Done installing as (g)vim plugin, use F4 in a text to use this script"
+	    exit 0;
             ;;
         "Quit")
             break
