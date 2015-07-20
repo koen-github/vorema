@@ -3,7 +3,13 @@
 Add this to your local ~/.emacs file (if file doesn't exist, create it)
 Replace path to the script location of emacs_vorema.el
 
-Compile a single jar file of Voremo, using sbt assembly
+Compile a single jar file of Voremo, using command sbt assembly
+
+
+##ADD TO THIS .EMACS FILE##
+##CHANGE PATH:##
 
 (add-to-list 'load-path "/home/koen/vorema/editorPlugins/")
 (load "emacs_vorema.el")
+
+

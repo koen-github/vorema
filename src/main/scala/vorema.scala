@@ -12,8 +12,7 @@ object Vorema {
                "\tARG1: the name of your musicplayer\n" +
                "\tARG2: directory of voice recordings\n" +
                "\tARG3: filename of current text file\n" +
-               "\tARG4: row of cursor position\n" +
-               "\tARG5: col of cursor posotion\n")
+               "\tARG4: row,col of cursor position\n")
 
       } else {
          println("You specified the following running options: ")

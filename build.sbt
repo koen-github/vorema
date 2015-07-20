@@ -10,5 +10,8 @@ scalacOptions in (Compile, doc) ++= Seq("-doc-title", "VoremaPlato")
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
 
+test in assembly := {}
+
+
 
     
